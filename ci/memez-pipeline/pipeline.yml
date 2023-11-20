@@ -54,14 +54,14 @@ spec:
       - name: output
         workspace: memez-pipeline
 
-    - name: load-test
-      taskRef:
-        name: load-test-memez
-      params:
-      - name: api-url
-        value: ""
-      runAfter:
-        - test
-      workspaces:
-      - name: output
-        workspace: memez-pipeline
+    # - name: load-test
+    #   taskRef:
+    #     name: load-test-memez
+    #   params:
+    #   - name: api-url
+    #     value: ""
+    #   runAfter:
+    #     - test
+    #   workspaces:
+    #   - name: output
+    #     workspace: memez-pipeline
