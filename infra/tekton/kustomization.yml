@@ -1,0 +1,6 @@
+
+resources:
+  - pipelines.yml
+  - triggers.yml
+  - interceptors.yml
+  - dashboard.yml
