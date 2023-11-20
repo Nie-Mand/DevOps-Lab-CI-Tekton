@@ -1,0 +1,67 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: memez-pipeline
+spec:
+  description: Build and Test Memez
+
+  # Parameters to be used in PipelineRuns
+  params:
+  - name: repository
+    type: string
+    description: The git repo URL to clone from.
+
+  # Volumes
+  workspaces:
+  - name: memez-pipeline
+    description: |
+      A shared volume between all tasks in the pipeline.
+
+  # Tasks to run
+  tasks:
+    - name: pull-repo
+      taskRef:
+        name: git-clone
+      workspaces:
+      - name: output
+        workspace: memez-pipeline
+      params:
+      - name: url
+        value: $(params.repository)
+
+    - name: build
+      taskRef:
+        name: build-memez
+      runAfter:
+        - pull-repo
+      workspaces:
+      - name: output
+        workspace: memez-pipeline
+        
+    - name: test
+      taskRef:
+        name: test-memez
+      params:
+      - name: sonarqube-url
+        value: http://sonarqube-internal.sonarqube:9000
+      - name: sonarqube-token
+        value: sonarqube-token
+      - name: sonarqube-project-key
+        value: memez
+      runAfter:
+        - build
+      workspaces:
+      - name: output
+        workspace: memez-pipeline
+
+    - name: load-test
+      taskRef:
+        name: load-test-memez
+      params:
+      - name: api-url
+        value: ""
+      runAfter:
+        - test
+      workspaces:
+      - name: output
+        workspace: memez-pipeline

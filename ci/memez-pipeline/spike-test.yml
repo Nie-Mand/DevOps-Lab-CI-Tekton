@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: spike-test-memez
+spec:
+  description: Run spike Tests
+  workspaces:
+    - name: output
+  params:
+    - name: api-url
+      description: The URL of the API to test
+      type: string
+  steps:
+    - name: run-spike-tests
+      image: grafana/k6:latest
+      workingDir: /workspace/output
+      script: |
+        #!/bin/sh
+        make test-spike
+    - name: verify-spike-reports
+      workingDir: /workspace/output
+      image: alpine
+      script: |
+        #!/bin/sh
+        ls -R out
+    - name: publish-results
+      workingDir: /workspace/output
+      image: alpine
+      script: |
+        #!/bin/sh
+        echo "Send spike test results somewhere, like SonarQube.."

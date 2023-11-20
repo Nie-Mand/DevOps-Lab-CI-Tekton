@@ -4,31 +4,6 @@ kind: Namespace
 metadata:
   name: sonarqube
 ---
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: sonarqube-pv
-  namespace: sonarqube
-spec:
-  capacity:
-    storage: 4Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: sonarqube-pvc
-  namespace: sonarqube
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 4Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,5 +45,18 @@ spec:
   - port: 9000
     targetPort: 9000
     nodePort: 31002
+  selector:
+    app: sonarqube
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqube-internal
+  namespace: sonarqube
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9000
+    targetPort: 9000
   selector:
     app: sonarqube

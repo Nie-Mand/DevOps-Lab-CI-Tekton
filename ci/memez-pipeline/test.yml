@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: test-memez
+spec:
+  description: Run Unit and Integration Tests
+  workspaces:
+    - name: output
+  params:
+    - name: sonarqube-url
+      description: The URL of the SonarQube server
+      type: string
+    - name: sonarqube-token
+      description: The token to use to authenticate with the SonarQube server
+      type: string
+    - name: sonarqube-project-key
+      description: The project key to use when sending data to the SonarQube server
+      type: string
+  steps:
+    - name: run-tests
+      image: docker.io/library/golang
+      workingDir: /workspace/output
+      script: |
+        #!/bin/sh
+        make test
+    - name: verify-reports
+      workingDir: /workspace/output
+      image: docker.io/library/golang
+      script: |
+        #!/bin/sh
+        ls -R out
+    - name: setup-sonarqube
+      workingDir: /workspace/output
+      image: ubuntu:20.04
+      script: |
+        #!/bin/sh
+        apt-get update && apt install -y curl unzip
+        export SONAR_SCANNER_VERSION=5.0.1.3006
+        export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+        curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+        unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+        export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+        export SONAR_SCANNER_OPTS="-server"
+        export SONAR_TOKEN=$(params.sonarqube-token)
+        sonar-scanner -Dsonar.projectKey=$(params.sonarqube-project-key) -Dsonar.host.url=$(params.sonarqube-url) -Dsonar.sources=.

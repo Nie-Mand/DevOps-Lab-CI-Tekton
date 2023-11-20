@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-memez
+spec:
+  description: Build Memez into /build
+  workspaces:
+    - name: output
+  steps:
+    - name: make-build
+      image: docker.io/library/golang
+      workingDir: /workspace/output
+      script: |
+        #!/bin/sh
+        make build
+    - name: verify-build
+      workingDir: /workspace/output
+      image: docker.io/library/golang
+      script: |
+        #!/bin/sh
+        ls -R build
