@@ -1,0 +1,8 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: github-pr-binding
+spec: 
+  params:
+  - name: repository
+    value: https://github.com/Nie-Mand/Memez.git

@@ -1,0 +1,7 @@
+
+resources:
+  - rbac.yml
+  - secret.yml
+  - template.yml
+  - binding.yml
+  - event-listener.yml

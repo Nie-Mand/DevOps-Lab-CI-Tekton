@@ -1,0 +1,30 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: github-template
+spec:
+  params:
+  - name: repository
+  resourceTemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: memez-pipelin-
+      spec:
+        pipelineRef:
+          name: memez-pipeline
+        params:
+        - name: repository
+          value: $(params.repository)
+        podTemplate:
+          securityContext:
+            fsGroup: 65532
+        workspaces:
+        - name: memez-pipeline
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
